@@ -6,3 +6,9 @@
 ~$*.doc*
 ~$*.xls*
 ~$*.ppt*
+
+# Terraform files
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
