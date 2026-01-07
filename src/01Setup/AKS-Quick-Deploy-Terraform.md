@@ -292,13 +292,20 @@ terraform apply main.tfplan
 - If you specified a different filename for the `-out` parameter, use that same filename in the call to `terraform apply`.
 - If you didn't use the `-out` parameter, call `terraform apply` without any parameters.
 
+
 ## Verify the results
+
+STEP 5
+
 
 ### 1. Get the resource group name
 
 ```bash
 resource_group_name=$(terraform output -raw resource_group_name)
+echo ${resource_group_name}
 ```
+
+STEP 6
 
 ### 2. Display the Kubernetes cluster name
 
@@ -309,6 +316,8 @@ az aks list \
   --output table
 ```
 
+STEP 7
+
 ### 3. Get the Kubernetes configuration
 
 Get the Kubernetes configuration from the Terraform state and store it in a file that `kubectl` can read:
@@ -316,6 +325,8 @@ Get the Kubernetes configuration from the Terraform state and store it in a file
 ```bash
 echo "$(terraform output kube_config)" > ./azurek8s
 ```
+
+STEP 8
 
 ### 4. Verify the configuration file
 
@@ -327,17 +338,27 @@ cat ./azurek8s
 
 > **Important:** If you see `<< EOT` at the beginning and `EOT` at the end, remove these characters from the file. Otherwise, you may receive the following error message: `error: error loading config file "./azurek8s": yaml: line 2: mapping values are not allowed in this context`
 
+STEP 9
+
 ### 5. Set the KUBECONFIG environment variable
 
 ```bash
 export KUBECONFIG=./azurek8s
 ```
 
+STEP 10
+
 ### 6. Verify the cluster health
 
 ```bash
 kubectl get nodes
 ```
+
+NOTE: You might get an error like:
+error: error loading config file "./azurek8s": yaml: line 2: mapping values are not allowed in this context
+
+If that is the case then remove the strings EOT from the azurek8s file and try again.
+
 
 **Key points:**
 - When you created the AKS cluster, monitoring was enabled to capture health metrics for both the cluster nodes and pods. These health metrics are available in the Azure portal. For more information on container health monitoring, see [Monitor Azure Kubernetes Service health](https://learn.microsoft.com/en-us/azure/azure-monitor/insights/container-insights-overview).
@@ -356,11 +377,9 @@ To deploy the application, you use a manifest file to create all the objects req
 
 > **Note:** We don't recommend running stateful containers, such as Rabbit MQ, without persistent storage for production. These are used here for simplicity, but we recommend using managed services, such as Azure CosmosDB or Azure Service Bus.
 
-### 1. Create the manifest file
+STEP 11
 
-Create a file named `aks-store-quickstart.yaml` and copy in the manifest from the [AKS Store Demo repository](https://github.com/Azure-Samples/aks-store-demo).
-
-### 2. Deploy the application
+### 1. Deploy the application
 
 Deploy the application using the `kubectl apply` command and specify the name of your YAML manifest:
 
@@ -385,6 +404,8 @@ service/store-front created
 
 When the application runs, a Kubernetes service exposes the application front end to the internet. This process can take a few minutes to complete.
 
+STEP 12
+
 ### 1. Check the pod status
 
 ```bash
@@ -392,6 +413,8 @@ kubectl get pods
 ```
 
 Make sure all pods are `Running` before proceeding.
+
+STEP 13
 
 ### 2. Monitor for the external IP address
 
@@ -415,6 +438,8 @@ NAME          TYPE           CLUSTER-IP    EXTERNAL-IP    PORT(S)        AGE
 store-front   LoadBalancer   10.0.100.10   20.62.159.19   80:30025/TCP   4h5m
 ```
 
+STEP 14
+
 ### 4. Browse to the application
 
 Open a web browser to the external IP address of your service to see the Azure Store app in action.
@@ -427,6 +452,9 @@ Open a web browser to the external IP address of your service to see the Azure S
 
 When you no longer need the resources created via Terraform, do the following steps:
 
+
+STEP 15
+
 #### 1. Create a destroy plan
 
 ```bash
@@ -437,11 +465,16 @@ terraform plan -destroy -out main.destroy.tfplan
 - The `terraform plan` command creates an execution plan, but doesn't execute it. Instead, it determines what actions are necessary to create the configuration specified in your configuration files. This pattern allows you to verify whether the execution plan matches your expectations before making any changes to actual resources.
 - The optional `-out` parameter allows you to specify an output file for the plan. Using the `-out` parameter ensures that the plan you reviewed is exactly what is applied.
 
+
+STEP 16
+
 #### 2. Apply the destroy plan
 
 ```bash
 terraform apply main.destroy.tfplan
 ```
+
+STEP 17
 
 ### Delete service principal (if applicable)
 
@@ -452,6 +485,19 @@ If you created a service principal:
 ```bash
 sp=$(terraform output -raw sp)
 ```
+
+STEP 18
+
+```bash
+echo ${sp}
+```
+
+If the command's output is like the following then you can skip step 19
+
+│ Warning: No outputs found │  │ The state file either has no outputs defined, ...
+
+
+STEP 19
 
 #### 2. Delete the service principal
 
