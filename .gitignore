@@ -1,0 +1,8 @@
+# Word documents
+*.docx
+*.doc
+
+# Temporary Office files
+~$*.doc*
+~$*.xls*
+~$*.ppt*
