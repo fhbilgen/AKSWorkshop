@@ -29,6 +29,22 @@ Azure Kubernetes Service (AKS) is a managed Kubernetes service that lets you qui
 - Make sure that the identity you use to create your cluster has the appropriate minimum permissions. For more details on access and identity for AKS, see Access and identity options for Azure Kubernetes Service (AKS)
 - To deploy a Bicep file, you need write access on the resources you create and access to all operations on the `Microsoft.Resources/deployments` resource type. For example, to create a virtual machine, you need `Microsoft.Compute/virtualMachines/write` and `Microsoft.Resources/deployments/*` permissions. For a list of roles and permissions, see Azure built-in roles
 
+STEP 1
+```bash
+az provider show --namespace Microsoft.ContainerService --query registrationState
+```
+
+If necessary, register the resource provider:
+STEP 2: OPTIONAL
+```bash
+az provider register --namespace Microsoft.ContainerService
+```
+
+STEP 3
+
+az group create --name aks-bicep-rg --location westus2
+
+STEP 4
 ### Create an SSH key pair
 
 1. Go to [https://shell.azure.com](https://shell.azure.com/) to open Cloud Shell in your browser
@@ -37,11 +53,14 @@ Azure Kubernetes Service (AKS) is a managed Kubernetes service that lets you qui
 
 ```bash
 # Create an SSH key pair using Azure CLI
-az sshkey create --name "mySSHKey" --resource-group "myResourceGroup"
+az sshkey create --name "mySSHKey" --resource-group aks-bicep-rg
 
+STEP 5
 # Create an SSH key pair using ssh-keygen
 ssh-keygen -t rsa -b 4096
 ```
+
+NOTE: Know there should be two files: aks-bicep and aks-bicep.pub in the working folder !!!
 
 For more information about creating SSH keys, see Create and manage SSH keys for authentication in Azure.
 
@@ -49,68 +68,7 @@ For more information about creating SSH keys, see Create and manage SSH keys for
 
 The Bicep file used in this quickstart is from Azure Quickstart Templates.
 
-```bicep
-@description('The name of the Managed Cluster resource.')
-param clusterName string = 'aks101cluster'
-
-@description('The location of the Managed Cluster resource.')
-param location string = resourceGroup().location
-
-@description('Optional DNS prefix to use with hosted Kubernetes API server FQDN.')
-param dnsPrefix string
-
-@description('Disk size (in GB) to provision for each of the agent pool nodes. This value ranges from 0 to 1023. Specifying 0 will apply the default disk size for that agentVMSize.')
-@minValue(0)
-@maxValue(1023)
-param osDiskSizeGB int = 0
-
-@description('The number of nodes for the cluster.')
-@minValue(1)
-@maxValue(50)
-param agentCount int = 3
-
-@description('The size of the Virtual Machine.')
-param agentVMSize string = 'standard_d2s_v3'
-
-@description('User name for the Linux Virtual Machines.')
-param linuxAdminUsername string
-
-@description('Configure all linux machines with the SSH RSA public key string. Your key should include three parts, for example \'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm\'')
-param sshRSAPublicKey string
-
-resource aks 'Microsoft.ContainerService/managedClusters@2024-02-01' = {
-  name: clusterName
-  location: location
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    dnsPrefix: dnsPrefix
-    agentPoolProfiles: [
-      {
-        name: 'agentpool'
-        osDiskSizeGB: osDiskSizeGB
-        count: agentCount
-        vmSize: agentVMSize
-        osType: 'Linux'
-        mode: 'System'
-      }
-    ]
-    linuxProfile: {
-      adminUsername: linuxAdminUsername
-      ssh: {
-        publicKeys: [
-          {
-            keyData: sshRSAPublicKey
-          }
-        ]
-      }
-    }
-  }
-}
-
-output controlPlaneFQDN string = aks.properties.fqdn
-```
+main.bicep
 
 The resource defined in the Bicep file:
 
@@ -124,10 +82,23 @@ For more AKS samples, see the AKS quickstart templates site.
 
 > **Important:** The Bicep file sets the `clusterName` param to the string `aks101cluster`. If you want to use a different cluster name, make sure to update the string to your preferred cluster name before saving the file to your computer.
 
+STEP 6
+
 2. Deploy the Bicep file using Azure CLI:
 
 ```bash
 az deployment group create --resource-group myResourceGroup --template-file main.bicep --parameters dnsPrefix=<dns-prefix> linuxAdminUsername=<linux-admin-username> sshRSAPublicKey='<ssh-key>'
+```
+
+better version is:
+```bash
+az deployment group create \
+  --resource-group aks-bicep-rg \
+  --template-file ./src/01Setup/main.bicep \
+  --parameters clusterName=aks101cluster \
+               dnsPrefix=aks101cluster \
+               linuxAdminUsername=azureuser \
+               sshRSAPublicKey="$(cat aks-bicep.pub | tr -d '\n\r')"
 ```
 
 Provide the following values in the command:
@@ -150,11 +121,15 @@ To manage a Kubernetes cluster, use the Kubernetes command-line client, `kubectl
 az aks install-cli
 ```
 
+STEP 7
+
 2. Configure `kubectl` to connect to your Kubernetes cluster using the `az aks get-credentials` command. This command downloads credentials and configures the Kubernetes CLI to use them:
 
 ```bash
-az aks get-credentials --resource-group myResourceGroup --name myAKSCluster
+az aks get-credentials --resource-group aks-bicep-rg --name aks101cluster
 ```
+
+STEP 8
 
 3. Verify the connection to your cluster using the `kubectl get` command. This command returns a list of the cluster nodes:
 
@@ -421,6 +396,8 @@ spec:
 
 2. Deploy the application using the `kubectl apply` command and specify the name of your YAML manifest:
 
+STEP 9
+
 ```bash
 kubectl apply -f aks-store-quickstart.yaml
 ```
@@ -442,6 +419,8 @@ service/store-front created
 
 When the application runs, a Kubernetes service exposes the application front end to the internet. This process can take a few minutes to complete.
 
+STEP 10
+
 1. Check the status of the deployed pods using the `kubectl get pods` command. Make all pods are `Running` before proceeding:
 
 ```bash
@@ -449,6 +428,8 @@ kubectl get pods
 ```
 
 2. Check for a public IP address for the store-front application. Monitor progress using the `kubectl get service` command with the `--watch` argument:
+
+STEP 11
 
 ```bash
 kubectl get service store-front --watch
@@ -470,6 +451,8 @@ NAME          TYPE           CLUSTER-IP    EXTERNAL-IP    PORT(S)        AGE
 store-front   LoadBalancer   10.0.100.10   20.62.159.19   80:30025/TCP   4h5m
 ```
 
+STEP 12
+
 4. Open a web browser to the external IP address of your service to see the Azure Store app in action.
 
 ## Delete the cluster
@@ -478,9 +461,20 @@ If you don't plan on going through the AKS tutorial, clean up unnecessary resour
 
 Remove the resource group, container service, and all related resources using the `az group delete` command:
 
+STEP 13
+
 ```bash
-az group delete --name myResourceGroup --yes --no-wait
+az group delete --name aks-bicep-rg --yes --no-wait
 ```
+
+STEP 14
+
+Delete the key files. Delete the aks-bicep and aks-bicep.pub files 
+
+```bash
+rm aks-bicep aks-bicep.pub 
+```
+
 
 > **Note:** The AKS cluster was created with a system-assigned managed identity, which is the default identity option used in this quickstart. The platform manages this identity so you don't need to manually remove it.
 
