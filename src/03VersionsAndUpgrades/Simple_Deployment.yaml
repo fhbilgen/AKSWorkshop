@@ -1,0 +1,22 @@
+# Deployment with 6 replicas
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-upgrade
+  labels:
+    app: upgrade
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: upgrade
+  template:
+    metadata:
+      labels:
+        app: upgrade
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80

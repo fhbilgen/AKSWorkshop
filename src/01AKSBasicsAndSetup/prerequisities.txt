@@ -1,0 +1,29 @@
+WSL
+https://learn.microsoft.com/en-us/windows/wsl/install
+https://devblogs.microsoft.com/commandline/install-wsl-with-a-single-command-now-available-in-windows-10-version-2004-and-higher/
+
+Powershell 7
+
+https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-windows?view=powershell-7.5
+https://learn.microsoft.com/en-us/powershell/scripting/whats-new/migrating-from-windows-powershell-51-to-powershell-7?view=powershell-7.5
+
+
+.NET 10
+https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.102/dotnet-sdk-10.0.102-win-x64.exe 
+
+Azure CLI
+Windows: https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=azure-cli-latest&pivots=msi
+Linux: https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?view=azure-cli-latest&pivots=apt
+
+VS Code
+https://code.visualstudio.com/download
+
+Windows 10, 11 
+
+Kubectl
+https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/
+
+Terraform
+https://learn.microsoft.com/en-us/azure/developer/terraform/quickstart-configure
+Install via the WSL prompt following https://developer.hashicorp.com/terraform/install
+
