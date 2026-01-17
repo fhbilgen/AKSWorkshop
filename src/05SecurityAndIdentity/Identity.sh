@@ -144,3 +144,9 @@ kubectl describe pod sample-workload-identity-key-vault -n $SERVICE_ACCOUNT_NAME
 
 # To verify that pod is able to get a token and access the resource, use the kubectl logs command:
 kubectl logs -n $SERVICE_ACCOUNT_NAMESPACE sample-workload-identity-key-vault
+
+# STEP 11: Clean-up
+
+# Delete resource group
+echo "Deleting resource group"
+az group delete --name $RESOURCE_GROUP --yes --no-wait
