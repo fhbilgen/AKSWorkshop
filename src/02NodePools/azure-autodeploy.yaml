@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-auto-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vpa-auto-deployment
+  template:
+    metadata:
+      labels:
+        app: vpa-auto-deployment
+    spec:
+      containers:
+      #- name: mycontainer
+      - name: vpa-auto-deployment
+        #image: mcr.microsoft.com/oss/nginx/nginx:1.15.5-alpine
+        image: registry.k8s.io/ubuntu-slim:0.1
+        resources:
+          requests:
+            cpu: 100m
+            memory: 50Mi
+        command: ["/bin/sh"]
+        # Alpine uses BusyBox timeout which requires -t flag (not GNU timeout syntax)
+        args: ["-c", "while true; do timeout 0.5s yes >/dev/null; sleep 0.5; done"]
