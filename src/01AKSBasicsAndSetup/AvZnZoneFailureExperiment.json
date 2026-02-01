@@ -1,0 +1,44 @@
+{
+  "location": "centralus",
+  "identity": {
+    "type": "SystemAssigned"
+  },
+  "properties": {
+    "selectors": [
+      {
+        "type": "List",
+        "id": "selector1",
+        "targets": [
+          {
+            "type": "ChaosTarget",
+            "id": "/subscriptions/0b84cfe4-f9d9-4e33-84f5-5feec95b370e/resourceGroups/aksnodepooldemo-rg/providers/Microsoft.ContainerService/managedClusters/aksnodepooldemo/providers/Microsoft.Chaos/targets/Microsoft-AzureKubernetesServiceChaosMesh"
+          }
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "name": "Zone 2 Failure Simulation",
+        "branches": [
+          {
+            "name": "Kill pods in Zone 2",
+            "actions": [
+              {
+                "type": "continuous",
+                "name": "urn:csci:microsoft:azureKubernetesServiceChaosMesh:podChaos/2.1",
+                "selectorId": "selector1",
+                "duration": "PT5M",
+                "parameters": [
+                  {
+                    "key": "jsonSpec",
+                    "value": "{\"action\":\"pod-failure\",\"mode\":\"all\",\"selector\":{\"namespaces\":[\"default\"],\"labelSelectors\":{\"app\":\"mypod-app\"},\"nodeSelectors\":{\"topology.kubernetes.io/zone\":\"westus2-2\"}}}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

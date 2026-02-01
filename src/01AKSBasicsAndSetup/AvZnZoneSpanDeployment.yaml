@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mypod-deployment
+  labels:
+    app: mypod-app
+spec:
+  replicas: 12
+  selector:
+    matchLabels:
+      app: mypod-app
+  template:
+    metadata:
+      labels:
+        app: mypod-app
+    spec:
+      topologySpreadConstraints:
+      # - maxSkew: 1
+      #   topologyKey: "kubernetes.io/hostname"
+      #   whenUnsatisfiable: ScheduleAnyway
+      #   labelSelector:
+      #     matchLabels:
+      #       app: mypod-app
+      # the following is the default constraint added by AKS for zone spreading since v1.33
+      - maxSkew: 1
+        topologyKey: "topology.kubernetes.io/zone"
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: mypod-app
+      containers:
+      - name: nginx
+        image: nginx:latest

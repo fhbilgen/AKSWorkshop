@@ -200,6 +200,7 @@ kubectl describe scaledjob myconsumer-scaledjob
 # Normal   KEDAJobsCreated     10m   scale-handler  Created 10 jobs
 
 
+# STEP 9: Clean up resources
 # Delete resource group
 echo "Deleting resource group"
 az group delete --name $RESOURCE_GROUP --yes --no-wait
