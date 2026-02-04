@@ -14,6 +14,11 @@ echo "Create a cluster with a single Ubuntu node pool and Windows support"
 az aks create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --node-count 2 --os-sku Ubuntu --location $LOCATION --generate-ssh-keys
 
 
-# STEP 2: Add a second node pool 
-echo "Adding a second node pool to the existing AKS cluster"
-az aks nodepool add --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NAME --name $NODEPOOL_NAME --node-vm-size $VM_SIZE --os-type Linux --os-sku Ubuntu --node-count 2 --mode User
+# STEP 2: Get the credentials
+az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite-existing
+
+# STEP 3: Install the sample application
+# This file is published in the repo: https://github.com/Azure-Samples/aks-store-demo
+# The CPU request for the store-front container has been modified to 10m from 1m.
+kubectl apply -f src/00AKSStoreApp/aks-store-quickstart.yaml 
+
