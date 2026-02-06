@@ -69,12 +69,14 @@ az aks update --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --node-os-up
 #   "upgradeChannel": "stable"
 # }
 
+# Control the new configuration
+az aks show --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --query "autoUpgradeProfile"
 
 # STEP 6:Add maintenance windows
 
 # Add a new aksManagedAutoUpgradeSchedule and aksManagedNodeOSUpgradeSchedule configuration
-az aks maintenanceconfiguration add --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NAME --name aksManagedAutoUpgradeSchedule --schedule-type Weekly --day-of-week Saturday --interval-weeks 3 --duration 8 --utc-offset +03:00 --start-time 15:00
-az aks maintenanceconfiguration add --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NAME --name aksManagedNodeOSUpgradeSchedule --schedule-type Weekly --day-of-week Saturday --interval-weeks 3 --duration 8 --utc-offset +03:00 --start-time 17:00
+az aks maintenanceconfiguration add --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NAME --name aksManagedAutoUpgradeSchedule --schedule-type Weekly --day-of-week Friday --interval-weeks 3 --duration 8 --utc-offset +03:00 --start-time 13:55
+az aks maintenanceconfiguration add --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NAME --name aksManagedNodeOSUpgradeSchedule --schedule-type Weekly --day-of-week Friday --interval-weeks 3 --duration 8 --utc-offset +03:00 --start-time 14:55
 
 
 # STEP 7: Wait untile the upgrade starts. Allow 10 minutes to start from the sceduled time

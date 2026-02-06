@@ -4,8 +4,8 @@
 export CLUSTER_NAME="aksnodepooldemo"
 export RESOURCE_GROUP="aksnodepooldemo-rg"
 export LOCATION="westus2"
-export NODEPOOL_NAME_BLUE="bluenodepool"
-export NODEPOOL_NAME_GREEN="greennodepool"
+export NODEPOOL_NAME_BLUE="bluendpl"
+export NODEPOOL_NAME_GREEN="greendpl"
 export NODEPOOL_NAME_WINDOWS="winpol"
 export VM_SIZE="Standard_D4ds_v5"
 export WINDOWS_ADMIN_USERNAME="azureuser"
@@ -66,22 +66,26 @@ az aks nodepool list --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NA
 
 # STEP 6: Cordon blue nodes
 kubectl get nodes -o wide
-kubectl cordon <blue-node-1>
-kubectl cordon <blue-node-2>
 
-# STEP 7: Drain blue nodes
+# STEP 7
+
+# Empty the first node and test
+kubectl cordon <blue-node-1> 
 kubectl drain <blue-node-1> --ignore-daemonsets --delete-emptydir-data
+
+# Empty the second node and test
+kubectl cordon <blue-node-2>
 kubectl drain <blue-node-2> --ignore-daemonsets --delete-emptydir-data
+
+
+
 
 # STEP 8: Check the pods and make sure all of the pods are running on the green node pool and blue nodes are cordoned and drained
 kubectl get pods -o wide
 kubectl get node -o wide
 
 # STEP 9A:  Commit - Delete blue node pool 
-az aks nodepool delete \
-    --resource-group myResourceGroup \
-    --cluster-name myAKSCluster \
-    --name $NODEPOOL_NAME_BLUE
+az aks nodepool delete --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NAME --name $NODEPOOL_NAME_BLUE
 
 # STEP 9B: Roll back - Return to blue nodes
 kubectl uncordon <blue-node-1>

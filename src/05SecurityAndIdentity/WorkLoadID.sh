@@ -17,16 +17,19 @@ az aks create --resource-group "${RESOURCE_GROUP}" --name "${CLUSTER_NAME}" --en
 
 # STEP 3: Retrieve the OIDC issuer URL
 export AKS_OIDC_ISSUER="$(az aks show --name "${CLUSTER_NAME}" --resource-group "${RESOURCE_GROUP}" --query "oidcIssuerProfile.issuerUrl" --output tsv)"
+echo "AKS OIDC Issuer URL: ${AKS_OIDC_ISSUER}"
 
 # STEP 4: Create a managed identity
 export SUBSCRIPTION="$(az account show --query id --output tsv)"
 
 # Create a user-assigned managed identity using the az identity create command.
 export USER_ASSIGNED_IDENTITY_NAME="myIdentity$RANDOM_ID"
+echo "Creating user-assigned managed identity: ${USER_ASSIGNED_IDENTITY_NAME}"
 az identity create --name "${USER_ASSIGNED_IDENTITY_NAME}" --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}" --subscription "${SUBSCRIPTION}"
 
 # Get the client ID of the managed identity and save it to an environment variable using the [az identity show][az-identity-show] command
 export USER_ASSIGNED_CLIENT_ID="$(az identity show --resource-group "${RESOURCE_GROUP}" --name "${USER_ASSIGNED_IDENTITY_NAME}" --query 'clientId' --output tsv)"
+echo "User-assigned managed identity client ID: ${USER_ASSIGNED_CLIENT_ID}"
 
 # STEP 5: Create a Kubernetes service account
 
@@ -35,6 +38,9 @@ az aks get-credentials --name "${CLUSTER_NAME}" --resource-group "${RESOURCE_GRO
 # Create a Kubernetes service account and annotate it with the client ID of the managed identity by applying the following manifest using the kubectl apply command
 export SERVICE_ACCOUNT_NAME="workload-identity-sa$RANDOM_ID"
 export SERVICE_ACCOUNT_NAMESPACE="default"
+
+echo "Creating Kubernetes service account: ${SERVICE_ACCOUNT_NAME} in namespace: ${SERVICE_ACCOUNT_NAMESPACE}"
+
 
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
@@ -50,6 +56,8 @@ EOF
 export FEDERATED_IDENTITY_CREDENTIAL_NAME="myFedIdentity$RANDOM_ID"
 az identity federated-credential create --name ${FEDERATED_IDENTITY_CREDENTIAL_NAME} --identity-name "${USER_ASSIGNED_IDENTITY_NAME}" --resource-group "${RESOURCE_GROUP}" --issuer "${AKS_OIDC_ISSUER}" --subject system:serviceaccount:"${SERVICE_ACCOUNT_NAMESPACE}":"${SERVICE_ACCOUNT_NAME}" --audience api://AzureADTokenExchange
 
+echo "Created federated identity credential: ${FEDERATED_IDENTITY_CREDENTIAL_NAME}"
+
 # STEP 7: Create a key vault with Azure RBAC authorization
 # Create a key vault with purge protection and Azure RBAC authorization enabled
 # Ensure the key vault name is between 3-24 characters
@@ -60,7 +68,7 @@ az keyvault create --name "${KEYVAULT_NAME}" --resource-group "${RESOURCE_GROUP}
 
 # Get the key vault resource ID and save it to an environment variable
 export KEYVAULT_RESOURCE_ID=$(az keyvault show --resource-group "${RESOURCE_GROUP}" --name "${KEYVAULT_NAME}" --query id --output tsv)
-
+echo "Key Vault Resource ID: ${KEYVAULT_RESOURCE_ID}"
 
 # STEP 8: Assign RBAC permissions for key vault management
 
@@ -76,6 +84,7 @@ az keyvault secret set --vault-name "${KEYVAULT_NAME}" --name "${KEYVAULT_SECRET
 
 # Get the principal ID of the user-assigned managed identity and save it to an environment variable
 export IDENTITY_PRINCIPAL_ID=$(az identity show --name "${USER_ASSIGNED_IDENTITY_NAME}" --resource-group "${RESOURCE_GROUP}" --query principalId --output tsv)
+echo $"User-assigned managed identity principal ID: ${IDENTITY_PRINCIPAL_ID}"
 
 # Assign the Key Vault Secrets User role to the user-assigned managed identity 
 # This step gives the managed identity permission to read secrets from the key vault.
@@ -84,6 +93,7 @@ az role assignment create --assignee-object-id "${IDENTITY_PRINCIPAL_ID}" --role
 
 # Create an environment variable for the key vault URL
 export KEYVAULT_URL="$(az keyvault show --resource-group "${RESOURCE_GROUP}" --name ${KEYVAULT_NAME} --query properties.vaultUri --output tsv)"
+echo "Key Vault URL: ${KEYVAULT_URL}"
 
 # STEP 10: Deploy a verification pod and test access
 # Deploy a pod to verify that the workload identity can access the secret in the key vault. The following example uses the ghcr.io/azure/azure-workload-identity/msal-go image,
