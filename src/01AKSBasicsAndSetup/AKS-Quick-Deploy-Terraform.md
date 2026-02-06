@@ -41,7 +41,7 @@ First, log into your Azure account and authenticate using one of the methods des
 
 STEP 1
 
-cd src/01Setup
+cd src/01AKSBasicsAndSetup
 
 
 STEP 2

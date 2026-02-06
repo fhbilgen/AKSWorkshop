@@ -94,7 +94,7 @@ better version is:
 ```bash
 az deployment group create \
   --resource-group aks-bicep-rg \
-  --template-file ./src/01Setup/main.bicep \
+  --template-file ./src/01AKSBasicsAndSetup/main.bicep \
   --parameters clusterName=aks101cluster \
                dnsPrefix=aks101cluster \
                linuxAdminUsername=azureuser \
@@ -399,7 +399,7 @@ spec:
 STEP 9
 
 ```bash
-kubectl apply -f aks-store-quickstart.yaml
+kubectl apply -f src/01AKSBasicsAndSetup/aks-store-quickstart.yaml 
 ```
 
 The following example output shows the deployments and services:

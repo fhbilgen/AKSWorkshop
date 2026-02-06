@@ -40,7 +40,7 @@ kubectl apply -f ./src/03VersionsAndUpgrades/Simple_Deployment.yaml
 kubectl get pods -o wide
 
 # STEP 4: Adding a new node pool to replace the second node pool 
-echo "Adding a new node pool with larger VM sizesto replace the second node pool"
+echo "Adding a new node pool with larger VM size to replace the second node pool"
 az aks nodepool add --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NAME --name $NODEPOOL_NAME_LARGER --node-vm-size $VM_SIZE_LARGER --os-type Linux --os-sku Ubuntu --node-count 2 --mode User
 
 kubectl get nodes -o wide

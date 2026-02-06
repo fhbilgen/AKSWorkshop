@@ -25,7 +25,7 @@ az aks nodepool update --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_
 az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
 
 # Apply the spot-pod YAML file. 
-kubectl apply -f ./src/01NodePools/B_nginx-spot-pod.yaml
+kubectl apply -f ./src/02NodePools/nginx-spot-pod.yaml
 
 # Then, observe that it is not get scheduled
 kubectl get pod
@@ -37,7 +37,7 @@ kubectl describe pod nginx-spot
 
 # Add a spot node pool
 echo "Adding a second node pool based on Spot VMSS to the existing AKS cluster"
-az aks nodepool add --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NAME --name $SPOT_NODEPOOL --priority Spot --eviction-policy Delete --spot-max-price -1 --enable-cluster-autoscaler --min-count 1 --max-count 3 --no-wait
+az aks nodepool add --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NAME --name $SPOT_NODEPOOL --priority Spot --eviction-policy Delete --spot-max-price -1 --enable-cluster-autoscaler --min-count 1 --max-count 3
 
 echo "Showing details for the spot node pool"
 az aks nodepool show --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NAME --name $SPOT_NODEPOOL

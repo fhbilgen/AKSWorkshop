@@ -35,7 +35,7 @@ az aks nodepool list --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NA
 ###   They should be running only on the user node pool ###
 ###########################################################
 
-az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
+az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite
 
 kubectl apply -f ./src/03VersionsAndUpgrades/Simple_Deployment.yaml
 
@@ -82,8 +82,12 @@ kubectl get events --all-namespaces --sort-by='.lastTimestamp' --watch
 kubectl get events -A --field-selector involvedObject.kind=Node --watch
 az aks nodepool list --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NAME --query "[].{Name:name, State:provisioningState, OrchestratorVersion:orchestratorVersion}" --output table
 
+# Now the cluster's version is between 1.33.0 and 1.33.4. You can verify via the portal in the AKS resource overview page.
+# STEP 6: Upgrade the node pool nodepool1 to 1.33.2
+# Let's try upgrading the node pool to 1.33.2
+az aks nodepool upgrade --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NAME --name nodepool1 --kubernetes-version 1.33.2
 
-# STEP 6: Clean-up
+# STEP 7: Clean-up
 
 # Delete resource group
 echo "Deleting resource group"

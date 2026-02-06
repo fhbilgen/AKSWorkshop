@@ -155,7 +155,7 @@ STEP 9
 
 Apply the file named `aks-store-quickstart.yaml` 
 ```bash
- kubectl apply -f 01Setup/aks-store-quickstart.yaml 
+ kubectl apply -f src/01AKSBasicsAndSetup/aks-store-quickstart.yaml 
 ```
 
 ## Test the application

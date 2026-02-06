@@ -10,7 +10,7 @@ echo "Creating resource group"
 az group create --name $RESOURCE_GROUP --location $LOCATION
 
 echo "Create a PRIVATE cluster with a single Ubuntu node pool"
-az aks create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --node-count 1 --os-sku Ubuntu --location $LOCATION --load-balancer-sku standard --enable-private-cluster --generate-ssh-keys
+az aks create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --node-count 1 --os-sku Ubuntu --location $LOCATION --enable-private-cluster --generate-ssh-keys
 
 # STEP: 3
 ###########################################################
@@ -57,29 +57,9 @@ kubectl cluster-info
 TOKEN=$(kubectl create token default) 
 
 # Make the call using curl
-curl -k -H "Authorization: Bearer $TOKEN" https://aksnodepoo-aksnodepooldemo--0b84cf-xzev55zg.hcp.westus2.azmk8s.io/api/v1/pods
+curl -k -H "Authorization: Bearer $TOKEN" https://$CONTROL_PLAN_IP/api/v1/pods
 
 # This should fail with
-# {
-#   "kind": "Status",
-#   "apiVersion": "v1",
-#   "metadata": {},
-#   "status": "Failure",
-#   "message": "pods is forbidden: User \"system:serviceaccount:default:default\" cannot list resource \"pods\" in API group \"\" at the cluster scope",
-#   "reason": "Forbidden",
-#   "details": {
-#     "kind": "pods"
-#   },
-#   "code": 403
-# }
-
-# because the service account does not have permissions to call the API. 
-# Therefore you need to create a role binding to assign the cluster-admin role to the default service account in the default namespace
-kubectl create clusterrolebinding default-sa-admin --clusterrole=cluster-admin --serviceaccount=default:default
-
-# Make the call again it should succeed this time
-curl -k -H "Authorization: Bearer $TOKEN" https://aksnodepoo-aksnodepooldemo--0b84cf-xzev55zg.hcp.westus2.azmk8s.io/api/v1/pods
-
 
 # STEP 6: Using Run-Command in the Portal
 # Kubernetes -> Kubernetes Resources -> Run command
@@ -91,7 +71,7 @@ curl -k -H "Authorization: Bearer $TOKEN" https://aksnodepoo-aksnodepooldemo--0b
 # In the Bastion pane, select Deploy Bastion.
 # Bastion deploys automatically with default settings. The deployment process takes about 10 minutes to complete.
 
-az aks bastion --name $CLUSTER_NAME --resource-group $RESOURCE_GROUP --admin --bastion /subscriptions/0b84cfe4-f9d9-4e33-84f5-5feec95b370e/resourceGroups/MC_aksprivclu-rg_aksprivclu_westus2/providers/Microsoft.Network/bastionHosts/aks-vnet-32668130-bastion
+az aks bastion --name $CLUSTER_NAME --resource-group $RESOURCE_GROUP --admin --bastion /subscriptions/<SUBSCRIPTIONID>/resourceGroups/MC_aksprivclu-rg_aksprivclu_westus2/providers/Microsoft.Network/bastionHosts/aks-vnet-32668130-bastion
 
 # STEP 8: Clean up the resources
 # Delete resource group

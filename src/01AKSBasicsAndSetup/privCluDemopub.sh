@@ -34,28 +34,11 @@ kubectl cluster-info
 TOKEN=$(kubectl create token default) 
 
 # Make the call using curl
-curl -k -H "Authorization: Bearer $TOKEN" https://aksnodepoo-aksnodepooldemo--0b84cf-xzev55zg.hcp.westus2.azmk8s.io/api/v1/pods
+# curl -k -H "Authorization: Bearer $TOKEN" https://aksnodepoo-aksnodepooldemo--0b84cf-xzev55zg.hcp.westus2.azmk8s.io/api/v1/pods
+curl -k -H "Authorization: Bearer $TOKEN" https://$CONTROL_PLAN_IP/api/v1/pods
 
 # This should fail with
-# {
-#   "kind": "Status",
-#   "apiVersion": "v1",
-#   "metadata": {},
-#   "status": "Failure",
-#   "message": "pods is forbidden: User \"system:serviceaccount:default:default\" cannot list resource \"pods\" in API group \"\" at the cluster scope",
-#   "reason": "Forbidden",
-#   "details": {
-#     "kind": "pods"
-#   },
-#   "code": 403
-# }
 
-# because the service account does not have permissions to call the API. 
-# Therefore you need to create a role binding to assign the cluster-admin role to the default service account in the default namespace
-kubectl create clusterrolebinding default-sa-admin --clusterrole=cluster-admin --serviceaccount=default:default
-
-# Make the call again it should succeed this time
-curl -k -H "Authorization: Bearer $TOKEN" https://aksnodepoo-aksnodepooldemo--0b84cf-xzev55zg.hcp.westus2.azmk8s.io/api/v1/pods
 
 # STEP 5: Clean up the resources
 # Delete resource group

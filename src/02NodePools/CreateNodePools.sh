@@ -17,6 +17,12 @@ az group create --name $RESOURCE_GROUP --location $LOCATION
 echo "Create a cluster with a single Ubuntu node pool and Windows support"
 az aks create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --vm-set-type VirtualMachineScaleSets --node-count 2 --os-sku Ubuntu --location $LOCATION --load-balancer-sku standard --network-plugin azure --windows-admin-username $WINDOWS_ADMIN_USERNAME --windows-admin-password $WINDOWS_ADMIN_PASSWORD --generate-ssh-keys
 
+# observe that the user load can be hosted by the system nodepool
+
+az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
+
+kubectl apply -f ./src/03VersionsAndUpgrades/Simple_Deployment.yaml
+
 #Taint the default node pool to prevent user pods from being scheduled on it
 az aks nodepool update --resource-group $RESOURCE_GROUP --cluster-name $CLUSTER_NAME --name nodepool1 --node-taints CriticalAddonsOnly=true:NoSchedule --mode System
 
